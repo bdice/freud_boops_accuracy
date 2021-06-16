@@ -1,4 +1,4 @@
-from calculate_boops import read_dat_snapshot, compute_qls_and_neighbors
+from calculate_boops import read_dat_snapshot, compute_qls_and_neighbors, compute_msms
 import gsd.hoomd
 import numpy as np
 import numpy.testing as npt
@@ -43,7 +43,7 @@ class TestInputData:
             )
 
 
-class TestSteinhardtValues:
+class TestSteinhardtReferenceValues:
     def test_gc_radius(self):
         gc_data = np.genfromtxt("GC_rc1.4_q4q6w4w6.txt")
         gsd_frame = read_gsd_snapshot("Test_Configuration.gsd")
@@ -82,4 +82,24 @@ class TestSteinhardtValues:
         for i, name in enumerate(names):
             npt.assert_allclose(
                 rvd_data[:, i], freud_data[:, i], atol=2e-5, err_msg=f"{name} failed"
+            )
+
+    @pytest.mark.parametrize(
+        "reference,average,wl",
+        [
+            ("q", False, False),
+            #("w", False, True),
+            ("avq", True, False),
+            #("avw", True, True),
+        ],
+    )
+    def test_msm_calc(self, reference, average, wl):
+        msm_data = np.genfromtxt(f"boop_reference/{reference}_0.txt")
+        gsd_frame = read_gsd_snapshot("Test_Configuration.gsd")
+        lmax = 6
+        freud_data = compute_msms(gsd_frame, lmax, average, wl)
+        for l in range(lmax + 1):
+            name = f"{reference}{l}"
+            npt.assert_allclose(
+                msm_data[:, l], freud_data[:, l], atol=5e-5, err_msg=f"{name} failed"
             )
