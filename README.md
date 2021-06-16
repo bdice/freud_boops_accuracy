@@ -1,5 +1,7 @@
 # Tests for BOOP accuracy
 
+This repository holds reference data and tests used to check the accuracy of bond-orientational order parameters in freud against reference data.
+
 To generate text files for freud, run:
 
 ```bash
