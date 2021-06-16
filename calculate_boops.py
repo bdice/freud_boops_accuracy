@@ -95,6 +95,20 @@ def compute_qls_and_neighbors(system, average=False, weighted=False):
     return compute_qls(system, nlist, average, weighted)
 
 
+def compute_msms(system, lmax, average=False, wl=False):
+    """Returns Minkowski Structure Metrics up to a maximum l value."""
+    # Use Voronoi neighbors
+    voro = freud.locality.Voronoi().compute(system=system)
+    return compute_steinhardts(
+        system,
+        [
+            dict(average=average, weighted=True, l=i, wl=wl, wl_normalize=wl)
+            for i in range(lmax + 1)
+        ],
+        voro.nlist,
+    )
+
+
 def write_file(fname, qls):
     with open(fname, "w") as file:
         for row in qls:
